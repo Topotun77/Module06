@@ -13,33 +13,30 @@
 
 class Car:
     price = 1000000
-    power = 100
 
     def horse_powers(self):
-        print(self.__class__.__name__, f'Мощность автомобиля {self.power} л.с.')
+        return 100
 
 
 class Nissan(Car):
     price = 2000000
-    power = 120
 
     def horse_powers(self):
-        print(self.__class__.__name__, f'Мощность автомобиля марки Nissan {self.power} л.с.')
+        return 120
 
 
 class Kia(Car):
     price = 3000000
-    power = 150
 
     def horse_powers(self):
-        print(self.__class__.__name__, f'Мощность автомобиля марки Kia {self.power} л.с.')
+        return 150
 
 
 car_ = Car()
-car_.horse_powers()
+print(f'Мощность автомобиля {car_.__class__.__name__} {car_.horse_powers()} л.с.')
 
 nissan_ = Nissan()
-nissan_.horse_powers()
+print(f'Мощность автомобиля {nissan_.__class__.__name__} {nissan_.horse_powers()} л.с.')
 
 kia_ = Kia()
-kia_.horse_powers()
+print(f'Мощность автомобиля {kia_.__class__.__name__} {kia_.horse_powers()} л.с.')
