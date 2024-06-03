@@ -131,7 +131,7 @@ async def get_text(update, context):
     txt3_ = (str_log(update, context) + '\nBot message:        ' + txt2_ + '\n')
     save_log(txt3_)
 
-app = ApplicationBuilder().token("7203239340:AAEEQUneDEhXnfT3UKkTdGesDLYhuUnYJBA").build()
+app = ApplicationBuilder().token("XXX").build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT, get_text))
