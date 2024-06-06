@@ -1,20 +1,23 @@
+# -*- coding: utf-8 -*-
 # from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters   #, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram import ReplyKeyboardMarkup
 from datetime import datetime
 from re import compile, UNICODE
 from random import randint
+import neural_net
+
 # from os import chdir
 word_dic = {
-    1: ['купить', 'покупки', 'список', '1'],
-    2: ['купил', 'куплен', '2'],
+    1: ['купить', 'покупки', 'список'],
+    2: ['купил', 'куплен'],
     3: ['зовут', 'имя'],
     4: ['время', 'времен', 'час'],
     5: ['хорош', 'отличн', 'великолепн'],
     6: ['плох', 'ужасн', 'отвратит'],
     7: ['войн'],
     8: ['анекдот']
-    }
+}
 anecdote = [
     'Девушка становится женщиной, когда впервые говорит: «Это хороший пакет, не выбрасывай!»',
     'Мяч еще летел в окно директора, а дети уже играли в прятки.',
@@ -62,28 +65,40 @@ def remove_smile(text):
                             u"\U0001f926-\U0001f937"
                             u"\U0001F1F2"
                             u"\U0001F1F4"
-                            u"\U0001F1F5-\U0001F61F"
                             u"\U0001F620"
                             u"\u200d"
                             u"\u2640-\u2642"
                             "]+", flags=UNICODE)
-    return emoji_pattern.sub(r':)', text)
+    text = emoji_pattern.sub(r':)', text)
+    text_2 = ''
+    for c in text:
+        try:
+            print(c, end='')
+            text_2 += c
+        except:
+            print(c.encode().hex(), end='')
+            text_2 += c.encode().hex()
+    return text_2
 
 
 def save_log(text):
-
     file_ = 'log.txt'
-    fl = open(file_, "a")
-    # fl = open(file_, "a", encoding='utf-8')
-    txt3_ = (str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + remove_smile(text) + '\n')
-    fl.write(txt3_)
-    fl.close()
+    with open(file_, "a", encoding='utf-8') as fl:
+        # fl = open(file_, "a", encoding='utf-8')
+        # txt3_ = (str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + remove_smile(text) + '\n')
+        # txt3_ = (str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + text.encode(encoding='utf-8') + '\n')
+        fl.write(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        # fl.write(str(text.encode(encoding='utf-8')))
+        fl.write(text)
+        fl.write('\n')
+
 
 def str_log(update, context):
     # return (f'   username=@{update.message.from_user.username},' +
     #         f' text="{update.message.text}"')
-    return (f'   Name={update.message.from_user.first_name}, username=@{update.message.from_user.username},' +
-            f' text="{update.message.text}"')
+    # return (f'   Name={update.message.from_user.first_name}, username=@{update.message.from_user.username},' +
+    #         f' text="{update.message.text}"')
+    return str(update)
 
 
 async def start(update, context):
@@ -95,6 +110,7 @@ async def start(update, context):
     # save_log('test \n')
     print(remove_smile(str_log(update, context) + '\nBot message:        ' + txt2_ + '\n'))
     save_log(str_log(update, context) + '\nBot message:        ' + txt2_ + '\n')
+
 
 async def get_text(update, context):
     def read_list():
@@ -115,19 +131,22 @@ async def get_text(update, context):
         fl.write('\n ____По этому списку куплено____\n')
         fl.close()
 
-    print(remove_smile(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + str(update)))
+    # print(str(update)[140:400])
+    print(remove_smile(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + remove_smile(str(update))))
     txt_ = str(update.message.text)
     txt_up = txt_.upper()
-    print(txt_up, str(list(word_dic.values())).upper())
+    print(remove_smile(txt_up), str(list(word_dic.values())).upper())
     bool_ = False
     txt2_ = ''
     for k, i in word_dic.items():
         for j in i:
+            if txt_up.isnumeric() and int(txt_up) == k:
+                txt_up = word_dic[k][0].upper()
             if j.upper() in txt_up:
                 txt2_ += '\n'
-                if k == 1:      # Список покупок
+                if k == 1:  # Список покупок
                     txt2_ += read_list()
-                elif k == 2:    # Все купили
+                elif k == 2:  # Все купили
                     write_list()
                     txt2_ += read_list()
                 elif k == 3:
@@ -141,7 +160,7 @@ async def get_text(update, context):
                 elif k == 7:
                     txt2_ += ('Тема войны, конечно, сейчас очень актуальна, но все же меня создавали '
                               'не для ее обсуждение. Когда меня подключат к нейронной сити, мы с вами обсудим '
-                              'и эту тему, а пока лучше спросите что-то еще, нажмите на /start или'
+                              'и эту тему, а пока лучше спросите что-то еще, нажмите на /start или '
                               'пожалуйтесь на плохое настроение\n')
                 elif k == 8:
                     txt2_ += ('Вы хотели анекдот? Тогда слушайте:\n\n')
@@ -150,17 +169,29 @@ async def get_text(update, context):
                     txt2_ += f'Московское время: {str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}\n'
                 bool_ = True
     if not bool_:
-        txt2_ = (f'Это Вы только что написали: \n__{txt_}__?\nНо я пока не очень умный, поэтому '
-                 f'могу разбирать только несколько ключевых слов, позже расскажу каких, '
-                 f'пока догадывайтесь сами )))')
-        txt2_ += '\n\nТак я отвечал раньше, теперь могу перечислить ключевые слова:\n\n'
-        for i in word_dic.values():
-            for j in i:
-                txt2_ += str(j) + ', '
-        txt2_ = txt2_[0:-2] + '\n\n     Попробуйте еще раз /start\n'
+        re_chat = chatterer.chat(N=200, out_file_name='return', space_num=0, start_txt=txt_)
+        if re_chat[1]:
+            txt2_ = f'Моя супернейросеть сгенерировала для Вас вот такой ответ:\n\n' + re_chat[1]
+        else:
+            txt2_ = (f'Это Вы только что написали: \n__{txt_}__?\nНо я пока не очень умный, поэтому '
+                     f'могу разбирать только несколько ключевых слов, позже расскажу каких, '
+                     f'пока догадывайтесь сами )))')
+            txt2_ += '\n\nТак я отвечал раньше, теперь могу перечислить ключевые слова:\n\n'
+            for i in word_dic.values():
+                for j in i:
+                    txt2_ += str(j) + ', '
+            txt2_ = txt2_[0:-2] + '\n\n     Попробуйте еще раз /start\n'
     await update.message.reply_text(txt2_)
     txt3_ = (str_log(update, context) + '\nBot message:        ' + txt2_ + '\n')
     save_log(txt3_)
+
+
+chatterer = neural_net.Chatterer(file_name='text.txt')
+chatterer.collect()
+chatterer.prepare()
+# chatterer.chat(N=10000, out_file_name='out.txt')
+# re_txt = chatterer.chat(N=200, out_file_name='return', space_num=0,
+#                      start_txt='Я бы очень хотел от вас услышать ответ на один вопрос')
 
 app = ApplicationBuilder().token("XXX").build()
 
