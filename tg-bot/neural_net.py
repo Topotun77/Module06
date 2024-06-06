@@ -143,5 +143,5 @@ if __name__ == '__main__':
     chatterer.prepare()
     # chatterer.chat(N=10000, out_file_name='out.txt')
     re_txt = chatterer.chat(N=200, out_file_name='return', space_num=0,
-                         start_txt='Свобода - это рабство! Я бы хотел уточнить война - это мир! занимательный момент, котоый случился со мной недавно')
+                         start_txt='Здесь должна быть фраза, на которую Вы хотите получить ответ')
     print('\nМой ответ: ', re_txt)
