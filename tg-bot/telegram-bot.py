@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters   #, ContextTypes
 from telegram import ReplyKeyboardMarkup
 from datetime import datetime
 from re import compile, UNICODE
@@ -156,7 +156,7 @@ async def get_text(update, context):
                 elif k == 6:
                     txt2_ += ('Жаль, что у вас не очень хорошее настроение, надеюсь анекдот из моей '
                               'базы поднимет его Вам.\n\n')
-                    txt2_ += anecdote[randint(0, len(anecdote))] + '\n'
+                    txt2_ += anecdote[randint(0, len(anecdote))-1] + '\n'
                 elif k == 7:
                     txt2_ += ('Тема войны, конечно, сейчас очень актуальна, но все же меня создавали '
                               'не для ее обсуждение. Когда меня подключат к нейронной сити, мы с вами обсудим '
@@ -164,19 +164,21 @@ async def get_text(update, context):
                               'пожалуйтесь на плохое настроение\n')
                 elif k == 8:
                     txt2_ += ('Вы хотели анекдот? Тогда слушайте:\n\n')
-                    txt2_ += anecdote[randint(0, len(anecdote))] + '\n'
+                    txt2_ += anecdote[randint(0, len(anecdote))-1] + '\n'
                 else:
                     txt2_ += f'Московское время: {str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}\n'
                 bool_ = True
     if not bool_:
         re_chat = chatterer.chat(N=200, out_file_name='return', space_num=0, start_txt=txt_)
-        if re_chat[1]:
+        if re_chat[0]:
             txt2_ = f'Моя супернейросеть сгенерировала для Вас вот такой ответ:\n\n' + re_chat[1]
+            txt2_ = txt2_[0:txt2_.rfind(' ')] + '.'
         else:
             txt2_ = (f'Это Вы только что написали: \n__{txt_}__?\nНо я пока не очень умный, поэтому '
                      f'могу разбирать только несколько ключевых слов, позже расскажу каких, '
                      f'пока догадывайтесь сами )))')
-            txt2_ += '\n\nТак я отвечал раньше, теперь могу перечислить ключевые слова:\n\n'
+            txt2_ += ('\n\nТак я отвечал раньше, теперь могу перечислить ключевые слова и сообщить, '
+                      'что могу отвечать на более длинные запросы:\n\n')
             for i in word_dic.values():
                 for j in i:
                     txt2_ += str(j) + ', '

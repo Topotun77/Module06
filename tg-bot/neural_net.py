@@ -70,6 +70,7 @@ class Chatterer:
         else:
             file_ = None
 
+        win_list = []
         if start_txt:
             if len(start_txt) < self.analize_count:
                 start_txt = ' ' * (self.analize_count - len(start_txt)) + start_txt
@@ -78,10 +79,10 @@ class Chatterer:
                     win_txt = start_txt[i:i+self.analize_count]
                     if win_txt in self.stat:
                         sequence = win_txt
-                        return_txt += sequence
-                        break
-            else:
-                return_txt = f'На фразу "{start_txt}" ничего не могу ответить. Спросите что-нибудь еще.'
+                        win_list += [win_txt]
+                        # break
+            if not win_list:
+                return_txt = f'\033[91mНа фразу "{start_txt}" ничего не могу ответить. Спросите что-нибудь еще.\033[0m'
                 print(return_txt)
                 if out_file_name == 'return':
                     return [False, return_txt]
@@ -90,10 +91,13 @@ class Chatterer:
                         file_.write(return_txt)
                         file_.close()
                     return [False]
+            print(f'\033[93mСписок найденных окон: {win_list}\033[0m')
+            if not randint(0, 3):   # Для большего веса последнего окна
+                sequence = win_list[randint(0, len(win_list)-1)]
+            return_txt += sequence
         else:
             sequence = ' ' * self.analize_count
 
-        # sequence = 'Брайен не '
         if file_:
             file_.write(sequence[0].upper() + sequence[1:])
         else:
@@ -142,6 +146,7 @@ if __name__ == '__main__':
     chatterer.collect()
     chatterer.prepare()
     # chatterer.chat(N=10000, out_file_name='out.txt')
-    re_txt = chatterer.chat(N=200, out_file_name='return', space_num=0,
-                         start_txt='Здесь должна быть фраза, на которую Вы хотите получить ответ')
-    print('\nМой ответ: ', re_txt)
+    for i in  range(5):
+        re_txt = chatterer.chat(N=200, out_file_name='return', space_num=0,
+                             start_txt='Что такое министерство правды?')
+        print('\nМой ответ: ', re_txt)
